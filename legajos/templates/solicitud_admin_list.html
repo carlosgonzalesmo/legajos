@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de Solicitudes</title>
+</head>
+<body>
+<h1>Gestión de Solicitudes</h1>
+<p><a href="{% url 'dashboard' %}">Volver al dashboard</a> | <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Estado</th>
+            <th>Fecha creación</th>
+            <th>Préstamos activos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for solicitud in solicitudes %}
+        <tr>
+            <td>{{ solicitud.id }}</td>
+            <td>{{ solicitud.usuario.get_full_name|default:solicitud.usuario.username }}</td>
+            <td>{{ solicitud.get_estado_display }}</td>
+            <td>{{ solicitud.creado_en }}</td>
+            <td>{{ solicitud.active_prestamos }}</td>
+            <td><a href="{% url 'solicitud_detail' solicitud.pk %}">Ver detalle</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6">Sin solicitudes registradas.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

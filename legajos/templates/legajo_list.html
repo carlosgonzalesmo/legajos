@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Legajos</title>
+</head>
+<body>
+<h1>Legajos</h1>
+<p><a href="{% url 'dashboard' %}">Volver al dashboard</a> | <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+<a href="{% url 'legajo_create' %}">Nuevo legajo</a>
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Título</th>
+            <th>Bloqueado</th>
+            <th>Disponible</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for l in legajos %}
+        <tr>
+            <td>{{ l.codigo }}</td>
+            <td>{{ l.titulo }}</td>
+            <td>{{ l.bloqueado }}</td>
+            <td>{{ l.disponible }}</td>
+            <td>
+                <a href="{% url 'legajo_toggle_bloqueo' l.pk %}">
+                    {% if l.bloqueado %}Desbloquear{% else %}Bloquear{% endif %}
+                </a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5">Sin legajos</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

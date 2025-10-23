@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Solicitudes</title>
+</head>
+<body>
+<h1>Solicitudes</h1>
+<p><a href="{% url 'dashboard' %}">Volver al dashboard</a> | <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+<a href="{% url 'solicitud_create' %}">Nueva solicitud</a>
+<ul>
+{% for s in solicitudes %}
+    <li><a href="{% url 'solicitud_detail' s.pk %}">Solicitud #{{ s.id }} - {{ s.estado }}</a> ({{ s.creado_en }})</li>
+{% empty %}
+    <li>Sin solicitudes</li>
+{% endfor %}
+</ul>
+</body>
+</html>

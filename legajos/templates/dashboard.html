@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard Legajos</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    {% if user.is_authenticated %}
+        <p>Hola {{ user.get_full_name|default:user.username }} | <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+    {% endif %}
+
+    {% if es_admin %}
+        <section>
+            <h2>Panel administrativo</h2>
+            <ul>
+                <li>Total legajos: {{ total_legajos }}</li>
+                <li>Solicitudes pendientes: {{ solicitudes_pendientes }}</li>
+                <li>Solicitudes con préstamos activos: {{ prestamos_activos }}</li>
+            </ul>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'legajo_list' %}">Administrar legajos</a></li>
+                    <li><a href="{% url 'solicitud_admin_list' %}">Gestionar solicitudes</a></li>
+                </ul>
+            </nav>
+        </section>
+    {% else %}
+        <section>
+            <h2>Panel de usuario</h2>
+            <ul>
+                <li>Solicitudes activas: {{ solicitudes_activas }}</li>
+                <li>Préstamos activos: {{ prestamos_activos }}</li>
+            </ul>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'solicitud_list' %}">Mis solicitudes</a></li>
+                    <li><a href="{% url 'solicitud_create' %}">Nueva solicitud</a></li>
+                </ul>
+            </nav>
+        </section>
+    {% endif %}
+</body>
+</html>

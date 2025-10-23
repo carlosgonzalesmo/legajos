@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Nueva Solicitud</title>
+</head>
+<body>
+<h1>Crear Solicitud</h1>
+<p><a href="{% url 'solicitud_list' %}">Volver a mis solicitudes</a> | <a href="{% url 'dashboard' %}">Dashboard</a> | <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+<form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div style="color:red;">
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+    <fieldset>
+        <legend>{{ form.legajos.label }}</legend>
+        <ul style="list-style:none;padding-left:0;">
+        {% for checkbox in form.legajos %}
+            <li>
+                <label>{{ checkbox.tag }} {{ checkbox.choice_label }}</label>
+            </li>
+        {% empty %}
+            <li>No hay legajos disponibles.</li>
+        {% endfor %}
+        </ul>
+        {% if form.legajos.errors %}
+            <div style="color:red;">
+            {% for error in form.legajos.errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+            </div>
+        {% endif %}
+    </fieldset>
+
+    <button type="submit">Solicitar</button>
+</form>
+</body>
+</html>

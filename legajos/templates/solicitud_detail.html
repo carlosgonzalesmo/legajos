@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Detalle Solicitud</title>
+</head>
+<body>
+<h1>Solicitud #{{ solicitud.id }} - {{ solicitud.get_estado_display }}</h1>
+<p><a href="{% url 'solicitud_list' %}">Volver a solicitudes</a> | <a href="{% url 'dashboard' %}">Dashboard</a> | <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+<p>Creada: {{ solicitud.creado_en }} | Actualizada: {{ solicitud.actualizado_en }}</p>
+<h2>Items</h2>
+<ul>
+{% for item in solicitud.items.all %}
+    <li>{{ item.legajo.codigo }} - {{ item.legajo.titulo }} (Disponible al crear: {{ item.disponible_al_crear }})</li>
+{% empty %}
+    <li>Sin items</li>
+{% endfor %}
+</ul>
+<h2>Préstamos</h2>
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Legajo</th>
+            <th>Bloqueado prep</th>
+            <th>Entregado</th>
+            <th>Devuelto</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in solicitud.prestamos.all %}
+        <tr>
+            <td>{{ p.legajo.codigo }}</td>
+            <td>{{ p.bloqueado_en_prep }}</td>
+            <td>{{ p.entregado_en|default:'-' }}</td>
+            <td>{{ p.devuelto_en|default:'-' }}</td>
+            <td>
+                {% if not p.entregado_en %}
+                    <a href="{% url 'prestamo_entregar' p.pk %}">Confirmar entrega</a>
+                {% endif %}
+                {% if p.activo and p.entregado_en %}
+                    <a href="{% url 'prestamo_devolver' p.pk %}">Devolver</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5">Sin prestamos</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

@@ -23,7 +23,7 @@ class WorkflowTests(TestCase):
 		solicitud = Solicitud.objects.create(usuario=self.user)
 		prestamos = []
 		for idx in range(cantidad):
-			legajo = Legajo.objects.create(codigo=f"L{idx}", titulo=f"Legajo {idx}")
+			legajo = Legajo.objects.create(codigo=f"L{idx}", nombre=f"Legajo {idx}")
 			prestamos.append(
 				Prestamo.objects.create(solicitud=solicitud, legajo=legajo, usuario=self.user)
 			)

@@ -9,14 +9,14 @@ class Legajo(models.Model):
 	"""Representa un legajo físico que puede ser solicitado y prestado."""
 
 	codigo = models.CharField(max_length=50, unique=True)
-	titulo = models.CharField(max_length=255)
+	nombre = models.CharField(max_length=255)
 	descripcion = models.TextField(blank=True)
 	bloqueado = models.BooleanField(default=False, help_text="Marcado si no se encuentra físicamente / extraviado")
 	creado_en = models.DateTimeField(auto_now_add=True)
 	actualizado_en = models.DateTimeField(auto_now=True)
 
 	def __str__(self) -> str:
-		return f"{self.codigo} - {self.titulo}"
+		return f"{self.codigo} - {self.nombre}"
 
 	@property
 	def disponible(self) -> bool:

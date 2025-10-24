@@ -11,7 +11,7 @@
 <h2>Items</h2>
 <ul>
 {% for item in solicitud.items.all %}
-    <li>{{ item.legajo.codigo }} - {{ item.legajo.titulo }} (Disponible al crear: {{ item.disponible_al_crear }})</li>
+    <li>{{ item.legajo.codigo }} - {{ item.legajo.nombre }} (Disponible al crear: {{ item.disponible_al_crear }})</li>
 {% empty %}
     <li>Sin items</li>
 {% endfor %}
@@ -26,7 +26,7 @@
         <li>
             <label>
                 <input type="checkbox" name="prestamos_listos" value="{{ prestamo.pk }}">
-                {{ prestamo.legajo.codigo }} - {{ prestamo.legajo.titulo }}
+                {{ prestamo.legajo.codigo }} - {{ prestamo.legajo.nombre }}
             </label>
         </li>
     {% empty %}
@@ -51,7 +51,7 @@
     <tbody>
     {% for p in solicitud.prestamos.all %}
         <tr>
-            <td>{{ p.legajo.codigo }} - {{ p.legajo.titulo }}</td>
+            <td>{{ p.legajo.codigo }} - {{ p.legajo.nombre }}</td>
             <td>{{ p.get_estado_display }}</td>
             <td>{{ p.entregado_en|default:'-' }}</td>
             <td>{{ p.devuelto_en|default:'-' }}</td>

@@ -29,7 +29,7 @@ class SolicitanteRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 class LegajoForm(forms.ModelForm):
     class Meta:
         model = Legajo
-        fields = ['codigo', 'titulo', 'descripcion']
+        fields = ['codigo', 'nombre', 'descripcion']
 
 
 class SolicitudForm(forms.Form):

@@ -9,6 +9,7 @@ urlpatterns = [
     path('solicitudes/gestion/', views.SolicitudAdminListView.as_view(), name='solicitud_admin_list'),
     path('solicitudes/nueva/', views.SolicitudCreateView.as_view(), name='solicitud_create'),
     path('solicitudes/<int:pk>/', views.SolicitudDetailView.as_view(), name='solicitud_detail'),
-    path('prestamos/<int:pk>/entregar/', views.prestamo_entregar_view, name='prestamo_entregar'),
+    path('solicitudes/<int:pk>/preparar/', views.solicitud_preparar_view, name='solicitud_preparar'),
+    path('solicitudes/<int:pk>/confirmar-entrega/', views.solicitud_confirmar_entrega_view, name='solicitud_confirmar_entrega'),
     path('prestamos/<int:pk>/devolver/', views.prestamo_devolver_view, name='prestamo_devolver'),
 ]

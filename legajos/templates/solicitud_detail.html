@@ -17,11 +17,32 @@
 {% endfor %}
 </ul>
 <h2>Préstamos</h2>
+{% if puede_preparar %}
+<form method="post" action="{% url 'solicitud_preparar' solicitud.pk %}">
+    {% csrf_token %}
+    <p>Seleccioná los legajos encontrados. Los no seleccionados se marcarán como extraviados.</p>
+    <ul style="list-style:none;padding-left:0;">
+    {% for prestamo in prestamos_pendientes %}
+        <li>
+            <label>
+                <input type="checkbox" name="prestamos_listos" value="{{ prestamo.pk }}">
+                {{ prestamo.legajo.codigo }} - {{ prestamo.legajo.titulo }}
+            </label>
+        </li>
+    {% empty %}
+        <li>Sin legajos pendientes por preparar.</li>
+    {% endfor %}
+    </ul>
+    {% if prestamos_pendientes %}
+    <button type="submit">Confirmar preparación</button>
+    {% endif %}
+</form>
+{% endif %}
 <table border="1" cellpadding="4">
     <thead>
         <tr>
             <th>Legajo</th>
-            <th>Bloqueado prep</th>
+            <th>Estado</th>
             <th>Entregado</th>
             <th>Devuelto</th>
             <th>Acciones</th>
@@ -30,15 +51,12 @@
     <tbody>
     {% for p in solicitud.prestamos.all %}
         <tr>
-            <td>{{ p.legajo.codigo }}</td>
-            <td>{{ p.bloqueado_en_prep }}</td>
+            <td>{{ p.legajo.codigo }} - {{ p.legajo.titulo }}</td>
+            <td>{{ p.get_estado_display }}</td>
             <td>{{ p.entregado_en|default:'-' }}</td>
             <td>{{ p.devuelto_en|default:'-' }}</td>
             <td>
-                {% if not p.entregado_en %}
-                    <a href="{% url 'prestamo_entregar' p.pk %}">Confirmar entrega</a>
-                {% endif %}
-                {% if p.activo and p.entregado_en %}
+                {% if not es_admin and p.estado == estado_entregado %}
                     <a href="{% url 'prestamo_devolver' p.pk %}">Devolver</a>
                 {% endif %}
             </td>
@@ -48,5 +66,12 @@
     {% endfor %}
     </tbody>
 </table>
+{% if puede_confirmar_entrega %}
+<form method="post" action="{% url 'solicitud_confirmar_entrega' solicitud.pk %}" style="margin-top:1rem;">
+    {% csrf_token %}
+    <p>Confirmá la recepción de los legajos listos para entrega.</p>
+    <button type="submit">Confirmar recepción</button>
+</form>
+{% endif %}
 </body>
 </html>

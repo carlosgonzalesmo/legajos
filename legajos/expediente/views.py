@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -107,9 +108,7 @@ class SolicitudCreateView(SolicitanteRequiredMixin, FormView):
                 solicitud=solicitud,
                 legajo=legajo,
                 usuario=self.request.user,
-                bloqueado_en_prep=not legajo.disponible,
             )
-        solicitud.marcar_preparada()
         return redirect('solicitud_detail', pk=solicitud.pk)
 
 
@@ -123,14 +122,57 @@ class SolicitudDetailView(SolicitanteRequiredMixin, DetailView):
             return Solicitud.objects.all()
         return Solicitud.objects.filter(usuario=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        solicitud = context['solicitud']
+        usuario = self.request.user
+        es_admin = es_administrador(usuario)
+        prestamos_pendientes = solicitud.prestamos.filter(estado=Prestamo.ESTADO_PENDIENTE)
+        context.update(
+            es_admin=es_admin,
+            prestamos_pendientes=prestamos_pendientes,
+            puede_preparar=es_admin and solicitud.estado == Solicitud.ESTADO_PENDIENTE and prestamos_pendientes.exists(),
+            puede_confirmar_entrega=
+                (solicitud.usuario == usuario)
+                and solicitud.prestamos.filter(estado=Prestamo.ESTADO_LISTO).exists()
+                and solicitud.estado in (Solicitud.ESTADO_PREPARADA, Solicitud.ESTADO_PENDIENTE),
+            estado_entregado=Prestamo.ESTADO_ENTREGADO,
+        )
+        return context
+
+
+@user_passes_test(es_administrador)
+def solicitud_preparar_view(request, pk):
+    solicitud = get_object_or_404(Solicitud, pk=pk)
+    if request.method != 'POST':
+        return redirect('solicitud_detail', pk=solicitud.pk)
+    prestamos = list(solicitud.prestamos.filter(estado=Prestamo.ESTADO_PENDIENTE))
+    seleccionados = {int(value) for value in request.POST.getlist('prestamos_listos')}
+    with transaction.atomic():
+        for prestamo in prestamos:
+            if prestamo.pk in seleccionados:
+                prestamo.marcar_listo()
+            else:
+                prestamo.marcar_extraviado()
+        solicitud.marcar_preparada(bool(seleccionados))
+    return redirect('solicitud_detail', pk=solicitud.pk)
+
 
 @login_required
-def prestamo_entregar_view(request, pk):
-    prestamo = get_object_or_404(Prestamo, pk=pk)
-    if not (prestamo.usuario == request.user or es_administrador(request.user)):
+def solicitud_confirmar_entrega_view(request, pk):
+    solicitud = get_object_or_404(Solicitud, pk=pk)
+    if not (solicitud.usuario == request.user or es_administrador(request.user)):
         return HttpResponseForbidden('No autorizado')
-    prestamo.marcar_entregado()
-    return redirect('solicitud_detail', pk=prestamo.solicitud.pk)
+    if request.method != 'POST':
+        return redirect('solicitud_detail', pk=solicitud.pk)
+    prestamos_listos = list(solicitud.prestamos.filter(estado=Prestamo.ESTADO_LISTO))
+    if not prestamos_listos:
+        return redirect('solicitud_detail', pk=solicitud.pk)
+    with transaction.atomic():
+        for prestamo in prestamos_listos:
+            prestamo.marcar_entregado()
+        solicitud.marcar_entregada()
+    return redirect('solicitud_detail', pk=solicitud.pk)
 
 
 @login_required
@@ -146,7 +188,7 @@ def prestamo_devolver_view(request, pk):
 def legajo_toggle_bloqueo_view(request, pk):
     legajo = get_object_or_404(Legajo, pk=pk)
     legajo.bloqueado = not legajo.bloqueado
-    legajo.save(update_fields=['bloqueado'])
+    legajo.save()
     return redirect('legajo_list')
 
 # Create your views here.
